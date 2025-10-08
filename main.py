@@ -35,23 +35,22 @@
 
 import pandas as pd
 import numpy as np
+import pickle
 from sklearn.model_selection import train_test_split, cross_val_score, cross_val_predict
 from sklearn.preprocessing import StandardScaler
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.metrics import accuracy_score, precision_score, recall_score
 from scipy.stats import chi2_contingency
 
-# ===========================
-# Load and preprocess dataset
-# ===========================
+# Load dataset
 data = pd.read_csv("Titanic.csv")
 
 # Drop unnecessary columns
 data = data.drop(['Name', 'Ticket', 'Fare', 'Cabin'], axis=1)
 
-# ===========================
+
 # V2: Chi-Square Feature Selection
-# ===========================
+
 print("\n=== V2: Chi-Square Feature Selection ===")
 significant_features = []
 
@@ -89,9 +88,9 @@ y = data["Survived"]
 scaler = StandardScaler()
 X_scaled = scaler.fit_transform(X)
 
-# ===========================
+
 # V1: Train-Test Split Evaluation
-# ===========================
+
 X_train, X_test, y_train, y_test = train_test_split(
     X_scaled, y, test_size=0.2, random_state=42
 )
@@ -106,9 +105,33 @@ print("Accuracy:", accuracy_score(y_test, y_pred))
 print("Precision:", precision_score(y_test, y_pred))
 print("Recall:", recall_score(y_test, y_pred))
 
-# ===========================
-# V3: Train-Test Split vs K-Fold CV
-# ===========================
+
+# Save Model and Preprocessing Objects
+
+print("\n=== Saving Model and Preprocessing Objects ===")
+
+# Save the trained model
+pickle.dump(model, open('./models/titanic_knn_model.pkl', 'wb'))
+print("✅ Model saved as 'titanic_knn_model.pkl'")
+
+# Save the scaler for consistent preprocessing
+pickle.dump(scaler, open('./models/scaler.pkl', 'wb'))
+print("✅ Scaler saved as 'scaler.pkl'")
+
+# Save feature names for future use
+feature_names = X.columns.tolist()
+pickle.dump(feature_names, open('./models/feature_names.pkl', 'wb'))
+print("✅ Feature names saved as 'feature_names.pkl'")
+
+# Save significant features list
+pickle.dump(significant_features, open('./models/significant_features.pkl', 'wb'))
+print("✅ Significant features saved as 'significant_features.pkl'")
+
+print("\n🎉 All pickle files generated successfully!")
+
+
+# V3 Train-Test Split vs K-Fold CV
+
 train_test_acc = accuracy_score(y_test, y_pred)
 print("\nTrain-Test Split Accuracy:", train_test_acc)
 
